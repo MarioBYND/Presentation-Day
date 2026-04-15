@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>The Vertical Dominion — Barbados</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/meshoptimizer@0.20.0/meshopt_decoder.js"></script>
+  <script>
+    (function enableMeshopt() {
+      if (!window.THREE || !THREE.GLTFLoader || !window.MeshoptDecoder) return;
+      if (!THREE.GLTFLoader.prototype.setMeshoptDecoder) return;
+      const OriginalGLTFLoader = THREE.GLTFLoader;
+      function PatchedGLTFLoader(manager) {
+        const loader = new OriginalGLTFLoader(manager);
+        try { loader.setMeshoptDecoder(window.MeshoptDecoder); } catch (e) {}
+        return loader;
+      }
+      PatchedGLTFLoader.prototype = OriginalGLTFLoader.prototype;
+      PatchedGLTFLoader.prototype.constructor = PatchedGLTFLoader;
+      THREE.GLTFLoader = PatchedGLTFLoader;
+    })();
+  </script>
+  <script src="https://gftruj.github.io/webzamples/aframe/controls/oculus-thumbstick-controls.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#000; overflow:hidden; }
+    #hud {
+      position:fixed; inset:0; pointer-events:none;
+      display:flex; flex-direction:column;
+      justify-content:space-between; padding:24px;
+      font-family:'Georgia','Times New Roman',serif;
+    }
+    #hdr { text-align:center; }
+    #ttl { font-size:20px; letter-spacing:.22em; color:rgba(255,255,255,.95); text-shadow:0 2px 14px rgba(0,0,0,.6); }
+    #sub { margin-top:6px; font-size:10px; letter-spacing:.3em; color:rgba(255,224,100,.92); text-shadow:0 1px 8px rgba(0,0,0,.55); }
+    #ctrl { text-align:center; font-size:11px; letter-spacing:.1em; color:rgba(255,255,255,.38); }
+  </style>
+</head>
+<body>
+<div id="hud">
+  <div id="hdr">
+    <div id="ttl">THE VERTICAL DOMINION</div>
+    <div id="sub">BARBADOS &nbsp;·&nbsp; A REPUBLIC REIMAGINED</div>
+  </div>
+  <div id="ctrl">W A S D &nbsp;·&nbsp; MOVE &nbsp;&nbsp;|&nbsp;&nbsp; DRAG &nbsp;·&nbsp; LOOK</div>
+</div>
+
+<a-scene fog="type:linear; color:#C8EEFF; near:90; far:180" renderer="antialias:true; colorManagement:true">
+
+  <a-assets timeout="60000">
+    <canvas id="cvs-sky"  width="2048" height="1024"></canvas>
+    <canvas id="cvs-sand" width="1024" height="1024"></canvas>
+    <a-asset-item id="rock"        src="Assets/nummulitic_limestone_germany.glb"></a-asset-item>
+    <a-asset-item id="palm-tree"   src="Assets/stylized_palm_tree_set.glb"></a-asset-item>
+    <a-asset-item id="chess-piece" src="Assets/chess-optimized.glb"></a-asset-item>
+  </a-assets>
+
+  <!-- SKY -->
+  <a-sky id="sky" radius="200"></a-sky>
+
+  <!-- ══ TERRAIN ══ -->
+  <a-plane id="sand-plane" rotation="-90 0 0" width="400" height="130"
+    position="0 0 30" material="roughness:1; repeat:28 10"></a-plane>
+  <a-plane id="wet-sand" rotation="-90 0 0" width="400" height="16"
+    position="0 -0.004 -22" material="roughness:1; repeat:28 2"></a-plane>
+  <a-plane rotation="-90 0 0" width="400" height="200"
+    position="0 0.02 120" material="color:#3E8C2A; roughness:1"></a-plane>
+  <a-box width="400" height="4" depth="30"
+    position="0 1.5 75" material="color:#2E7A1E; roughness:1"></a-box>
+  <a-box width="400" height="6" depth="20"
+    position="0 2.5 88" material="color:#256618; roughness:1"></a-box>
+
+  <!-- ══ OCEAN ══ -->
+  <a-plane id="foam1" rotation="-90 0 0" width="400" height="2"
+    position="0 0.018 -30"
+    material="color:#FFFFFF; opacity:.8; transparent:true; shader:flat"></a-plane>
+  <a-plane id="foam2" rotation="-90 0 0" width="400" height="1"
+    position="0 0.012 -33"
+    material="color:#FFFFFF; opacity:.4; transparent:true; shader:flat"></a-plane>
+  <a-plane id="water-shallow" rotation="-90 0 0" width="400" height="50"
+    position="0 -0.06 -55"
+    material="color:#1EC8B8; roughness:.03; metalness:.55; opacity:.86; transparent:true"></a-plane>
+  <a-plane id="water-mid" rotation="-90 0 0" width="400" height="70"
+    position="0 -0.12 -100"
+    material="color:#0E8FBE; roughness:.02; metalness:.58; opacity:.92; transparent:true"></a-plane>
+  <a-plane id="water-deep" rotation="-90 0 0" width="400" height="130"
+    position="0 -0.18 -170"
+    material="color:#0850A0; roughness:.02; metalness:.62; opacity:.97; transparent:true"></a-plane>
+  <a-plane rotation="-90 0 0" width="400" height="200"
+    position="0 -0.5 -270" material="color:#053870; roughness:1"></a-plane>
+
+  <!-- ══ LIMESTONE ROCKS ══ -->
+  <a-entity gltf-model="#rock" position=" 22  0 -28" scale="1.4 1.4 1.4" rotation="0  45  0"></a-entity>
+  <a-entity gltf-model="#rock" position=" 26  0 -28" scale="0.9 0.9 0.9" rotation="0 120  0"></a-entity>
+  <a-entity gltf-model="#rock" position=" 18  0 -33" scale="1.1 1.1 1.1" rotation="0 200  0"></a-entity>
+  <a-entity gltf-model="#rock" position=" 30  0 -35" scale="0.7 0.7 0.7" rotation="0  70  0"></a-entity>
+  <a-entity gltf-model="#rock" position=" 20  0 -22" scale="0.5 0.5 0.5" rotation="0 300  0"></a-entity>
+  <a-entity gltf-model="#rock" position="-25  0 -32" scale="1.6 1.6 1.6" rotation="0 160  0"></a-entity>
+  <a-entity gltf-model="#rock" position="-20  0 -28" scale="1.1 1.1 1.1" rotation="0  30  0"></a-entity>
+  <a-entity gltf-model="#rock" position="-30  0 -38" scale="1.2 1.2 1.2" rotation="0 250  0"></a-entity>
+  <a-entity gltf-model="#rock" position="-18  0 -24" scale="0.6 0.6 0.6" rotation="0  90  0"></a-entity>
+  <a-entity gltf-model="#rock" position="  4  0 -38" scale="1.8 1.8 1.8" rotation="0  15  0"></a-entity>
+  <a-entity gltf-model="#rock" position="  7  0 -44" scale="1.0 1.0 1.0" rotation="0 180  0"></a-entity>
+  <a-entity gltf-model="#rock" position="  0  0 -44" scale="0.8 0.8 0.8" rotation="0 280  0"></a-entity>
+  <a-entity gltf-model="#rock" position="-12  0 -18" scale="0.22 0.22 0.22" rotation="0  60  0"></a-entity>
+  <a-entity gltf-model="#rock" position=" 10  0 -20" scale="0.18 0.18 0.18" rotation="0 140  0"></a-entity>
+  <a-entity gltf-model="#rock" position=" -6  0 -10" scale="0.15 0.15 0.15" rotation="0 220  0"></a-entity>
+  <a-entity gltf-model="#rock" position="  3  0 -12" scale="0.12 0.12 0.12" rotation="0 330  0"></a-entity>
+
+  <!-- ══ PALM TREE ══ -->
+  <a-entity gltf-model="#palm-tree" position="-24 2.7 125" scale=".10 .10 .10" rotation="0 40 0"></a-entity>
+
+  <!-- ══ CHESS PIECE ══ -->
+  <a-entity id="chess-piece-anchor"
+            position="0 0.02 -250"
+            rotation="0 180 0"
+            scale="500 500 500">
+    <a-entity id="chess-piece-entity" gltf-model="#chess-piece"></a-entity>
+  </a-entity>
+
+  <!-- ══ LIGHTING ══ -->
+  <a-light type="ambient"     color="#FFF8F0" intensity=".72"></a-light>
+  <a-light type="directional" position="2 22 5"    color="#FFFCE8" intensity="1.2"></a-light>
+  <a-light type="directional" position="-8 10 -10" color="#C8EEFF" intensity=".3"></a-light>
+  <a-light type="directional" position="0 -1 0"    color="#F5D98A" intensity=".12"></a-light>
+
+  <!-- ══ CAMERA ══ -->
+  <a-entity id="rig" position="0 1.6 1">
+    <a-camera>
+      <a-entity oculus-touch-controls="hand: left"></a-entity>
+      <a-entity oculus-touch-controls="hand: right" oculus-thumbstick-controls></a-entity>
+    </a-camera>
+  </a-entity>
+
+</a-scene>
+
+<script>
+function makeSky() {
+  const c = document.getElementById('cvs-sky');
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0,    '#0B3D9E');
+  g.addColorStop(0.20, '#1565C0');
+  g.addColorStop(0.42, '#1E88E5');
+  g.addColorStop(0.60, '#42A5F5');
+  g.addColorStop(0.75, '#90CAF9');
+  g.addColorStop(0.88, '#E3F2FD');
+  g.addColorStop(1,    '#FFFFFF');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  function drawCloud(cx, cy, scale, alpha) {
+    ctx.globalAlpha = alpha;
+    const puffs = [
+      [0,0,60],[-55,15,45],[55,15,45],[-28,-22,40],[28,-22,40],
+      [-85,25,35],[85,25,35],[0,-40,32],
+    ];
+    puffs.forEach(([dx, dy, r]) => {
+      const cg = ctx.createRadialGradient(
+        cx+dx*scale, cy+dy*scale, 0, cx+dx*scale, cy+dy*scale, r*scale);
+      cg.addColorStop(0,   'rgba(255,255,255,1)');
+      cg.addColorStop(0.5, 'rgba(245,248,255,0.92)');
+      cg.addColorStop(1,   'rgba(220,235,255,0)');
+      ctx.fillStyle = cg;
+      ctx.beginPath();
+      ctx.arc(cx+dx*scale, cy+dy*scale, r*scale, 0, Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  drawCloud(420,220,1.4,0.95); drawCloud(1200,180,1.1,0.9);
+  drawCloud(1700,260,1.2,0.88); drawCloud(150,280,1.0,0.85);
+  drawCloud(950,300,0.9,0.82); drawCloud(680,350,0.7,0.75);
+  drawCloud(1500,340,0.75,0.72); drawCloud(300,380,0.55,0.6);
+  drawCloud(1100,390,0.5,0.58); drawCloud(1850,370,0.6,0.62);
+
+  document.getElementById('sky').setAttribute('material',
+    'src: #cvs-sky; shader: flat; side: back');
+}
+
+function makeSand() {
+  const c = document.getElementById('cvs-sand');
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+
+  ctx.fillStyle = '#D9B96A';
+  ctx.fillRect(0, 0, W, H);
+
+  for (let i = 0; i < 120; i++) {
+    const x = Math.random()*W, y = Math.random()*H;
+    const r = 20 + Math.random()*60, v = 0.82 + Math.random()*0.28;
+    const cg = ctx.createRadialGradient(x,y,0,x,y,r);
+    cg.addColorStop(0, `rgba(${Math.floor(210*v)},${Math.floor(165*v)},${Math.floor(75*v)},0.18)`);
+    cg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = cg; ctx.fillRect(x-r, y-r, r*2, r*2);
+  }
+  for (let i = 0; i < 38000; i++) {
+    const x = Math.random()*W, y = Math.random()*H, v = 0.5 + Math.random()*0.85;
+    ctx.globalAlpha = 0.18 + Math.random()*0.25;
+    ctx.fillStyle = `rgb(${Math.floor(215*v)},${Math.floor(168*v)},${Math.floor(82*v)})`;
+    ctx.beginPath(); ctx.arc(x, y, 0.4+Math.random()*1.4, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 0.35;
+  for (let i = 0; i < 400; i++) {
+    const x = Math.random()*W, y = Math.random()*H;
+    const r = 1.5+Math.random()*4, v = 0.55+Math.random()*0.5;
+    ctx.fillStyle = `rgb(${Math.floor(160*v)},${Math.floor(145*v)},${Math.floor(110*v)})`;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 0.04; ctx.strokeStyle = '#7A5810'; ctx.lineWidth = 0.9;
+  for (let i = 0; i < 35; i++) {
+    const y = Math.random()*H;
+    ctx.beginPath(); ctx.moveTo(0, y);
+    for (let x = 0; x < W; x += 6)
+      ctx.lineTo(x, y + Math.sin(x*0.05 + i*1.4) * 3);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  document.getElementById('sand-plane').setAttribute('material',
+    'src: #cvs-sand; roughness: 1; repeat: 28 10');
+
+  const wc = document.createElement('canvas');
+  wc.width = 512; wc.height = 512;
+  const w = wc.getContext('2d');
+  w.fillStyle = '#A8843A'; w.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 14000; i++) {
+    const x = Math.random()*512, y = Math.random()*512, v = 0.65+Math.random()*0.55;
+    w.globalAlpha = 0.22;
+    w.fillStyle = `rgb(${Math.floor(160*v)},${Math.floor(120*v)},${Math.floor(55*v)})`;
+    w.beginPath(); w.arc(x, y, 0.5+Math.random()*1.5, 0, Math.PI*2); w.fill();
+  }
+  document.getElementById('wet-sand').setAttribute('material',
+    'src: ' + wc.toDataURL() + '; roughness: 1; repeat: 28 2');
+}
+
+(function animateWaves() {
+  const foam1   = document.getElementById('foam1');
+  const foam2   = document.getElementById('foam2');
+  const shallow = document.getElementById('water-shallow');
+  const mid     = document.getElementById('water-mid');
+  let t = 0, last = null;
+
+  function tick(now) {
+    if (!last) last = now;
+    const dt = Math.min((now - last)*0.001, 0.05);
+    last = now; t += dt;
+
+    if (foam1) {
+      foam1.object3D.position.z = -30 + Math.sin(t*0.62)*1.4;
+      foam1.object3D.position.y = 0.018 + Math.abs(Math.sin(t*0.62))*0.022;
+      foam1.setAttribute('material',
+        `color:#FFFFFF; opacity:${(0.45+Math.abs(Math.sin(t*0.62))*0.36).toFixed(2)}; transparent:true; shader:flat`);
+    }
+    if (foam2) {
+      foam2.object3D.position.z = -33 + Math.sin(t*0.62+1.4)*0.9;
+      foam2.setAttribute('material',
+        `color:#FFFFFF; opacity:${(0.2+Math.abs(Math.sin(t*0.62+1.4))*0.22).toFixed(2)}; transparent:true; shader:flat`);
+    }
+    if (shallow) shallow.object3D.position.y = -0.06 + Math.sin(t*0.35)*0.028;
+    if (mid)     mid.object3D.position.y     = -0.12 + Math.sin(t*0.20)*0.018;
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const scene = document.querySelector('a-scene');
+  function init() {
+    makeSky();
+    makeSand();
+
+    const chess = document.getElementById('chess-piece-entity');
+    if (chess) {
+      chess.addEventListener('model-loaded', () => {
+        if (!window.THREE) return;
+        const modelObj = chess.object3D;
+        const parentObj = modelObj.parent;
+        if (!parentObj) return;
+
+        parentObj.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(modelObj);
+        const centerWorld = new THREE.Vector3();
+        box.getCenter(centerWorld);
+        const centerLocal = centerWorld.clone();
+        parentObj.worldToLocal(centerLocal);
+        modelObj.position.x -= centerLocal.x;
+        modelObj.position.z -= centerLocal.z;
+
+        parentObj.updateMatrixWorld(true);
+        const box2 = new THREE.Box3().setFromObject(modelObj);
+        const minLocal = box2.min.clone();
+        parentObj.worldToLocal(minLocal);
+        modelObj.position.y -= minLocal.y;
+        modelObj.position.y += 0.02;
+      });
+      chess.addEventListener('model-error', (e) =>
+        console.warn('[A-Frame] chess piece failed to load', e));
+    }
+  }
+  if (scene.hasLoaded) init();
+  else scene.addEventListener('loaded', init);
+});
+</script>
+</body>
+</html>

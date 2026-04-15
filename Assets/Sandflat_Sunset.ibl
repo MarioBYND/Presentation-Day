@@ -1,0 +1,45 @@
+[Header]
+ICOfile = "Sandflat_Sunset_Thumb.jpg"
+Name = "Sandflat Sunset"
+Author = "HDR Labs"
+Location = "Barbados"
+Comment = "outdoor, sunset, golden hour, sandy, beach, nice clouds, treeline"
+PREVIEWfile = "Sandflat_Sunset_preview.jpg"
+GEOlat = 13.3321190000000000
+GEOlong = -59.6086620000000020
+Link = "www.hdrlabs.com"
+Date = "2011:05:01"
+Time = "19:00:00"
+Height = 1.700000
+
+[Background]
+BGfile = "Sandflat_Sunset_8k.jpg"
+BGmap = 1
+BGu = 0.000000
+BGv = 0.000000
+BGheight = 4096
+
+[Enviroment]
+EVfile = "Sandflat_Sunset.exr"
+EVmap = 1
+EVu = 0.000000
+EVv = 0.000000
+EVheight = 256
+EVmulti = 1.000000
+EVgamma = 2.200000
+
+[Reflection]
+REFfile = "Sandflat_Sunset.exr"
+REFmap = 1
+REFu = 0.000000
+REFv = 0.000000
+REFheight = 4096
+REFmulti = 1.000000
+REFgamma = 2.200000
+
+[Sun]
+SUNcolor = 255,252,240
+SUNmulti = 1.023026
+SUNu = 0.920000
+SUNv = 0.456000
+
