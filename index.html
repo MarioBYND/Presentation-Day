@@ -7,6 +7,39 @@
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/meshoptimizer@0.20.0/meshopt_decoder.js"></script>
   <script>
+    (function enableDraco() {
+      const interval = setInterval(function() {
+        if (!window.THREE || !THREE.DRACOLoader || !window.AFRAME) return;
+        clearInterval(interval);
+        const dracoLoader = new THREE.DRACOLoader();
+        dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+        AFRAME.registerComponent('draco-model', {
+          schema: { src: { type: 'string' } },
+          init: function() {
+            const el = this.el;
+            const loader = new THREE.GLTFLoader();
+            loader.setDRACOLoader(dracoLoader);
+            loader.load(this.data.src, (gltf) => {
+              const scene = gltf.scene || gltf.scenes[0];
+              scene.traverse(function(node) {
+                if (node.isMesh) {
+                  node.castShadow = true;
+                  if (node.material) {
+                    node.material.envMapIntensity = 1.0;
+                    node.material.needsUpdate = true;
+                  }
+                }
+              });
+              el.setObject3D('mesh', scene);
+              el.emit('model-loaded', { format: 'gltf', model: scene });
+            }, undefined, (err) => console.error('draco-model load error', err));
+          },
+          remove: function() { this.el.removeObject3D('mesh'); }
+        });
+      }, 100);
+    })();
+  </script>
+  <script>
     (function enableMeshopt() {
       if (!window.THREE || !THREE.GLTFLoader || !window.MeshoptDecoder) return;
       if (!THREE.GLTFLoader.prototype.setMeshoptDecoder) return;
@@ -38,6 +71,14 @@
   </style>
 </head>
 <body>
+<audio id="bg-audio" src="https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/soundjay_beach_main-01.mp3" loop preload="auto"></audio>
+<script>
+  document.addEventListener('click', function startAudio() {
+    document.getElementById('bg-audio').play();
+    document.removeEventListener('click', startAudio);
+  }, { once: true });
+</script>
+
 <div id="hud">
   <div id="hdr">
     <div id="ttl">THE VERTICAL DOMINION</div>
@@ -51,9 +92,8 @@
   <a-assets timeout="60000">
     <canvas id="cvs-sky"  width="2048" height="1024"></canvas>
     <canvas id="cvs-sand" width="1024" height="1024"></canvas>
-    <a-asset-item id="rock"        src="Assets/nummulitic_limestone_germany.glb"></a-asset-item>
-    <a-asset-item id="palm-tree"   src="Assets/stylized_palm_tree_set.glb"></a-asset-item>
-    <a-asset-item id="chess-piece" src="Assets/chess-optimized.glb"></a-asset-item>
+    <a-asset-item id="rock"        src="https://raw.githubusercontent.com/MarioBYND/Presentation-Day/main/Assets/nummulitic_limestone_germany.glb"></a-asset-item>
+    <a-asset-item id="palm-tree"   src="https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/stylized_palm_tree_set.glb"></a-asset-item>
   </a-assets>
 
   <!-- SKY -->
@@ -111,13 +151,23 @@
   <!-- ══ PALM TREE ══ -->
   <a-entity gltf-model="#palm-tree" position="-24 2.7 125" scale=".10 .10 .10" rotation="0 40 0"></a-entity>
 
-  <!-- ══ CHESS PIECE ══ -->
-  <a-entity id="chess-piece-anchor"
-            position="0 0.02 -250"
-            rotation="0 180 0"
-            scale="500 500 500">
-    <a-entity id="chess-piece-entity" gltf-model="#chess-piece"></a-entity>
-  </a-entity>
+  <!-- ══ BEACH PALMS ══ -->
+  <a-entity draco-model="src:https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/palms.glb" position="-25 0 2" scale="1 1 1" rotation="0  30 0"></a-entity>
+  <a-entity draco-model="src:https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/palms.glb" position=" 10 0 0" scale="1 1 1" rotation="0 200 0"></a-entity>
+  <a-entity draco-model="src:https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/palms.glb" position=" -5 0 -2" scale="1 1 1" rotation="0 100 0"></a-entity>
+
+  <!-- ══ CHESS PIECES ══ -->
+  <a-entity draco-model="src:https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/King%20-%20President.glb"  position="-30 -2 -50" scale="16 16 16" rotation="0  20 0"></a-entity>
+  <a-entity draco-model="src:https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/Queen%20-%20Prime%20Minister.glb" position="-10 -2 -62" scale="16 16 16" rotation="0 350 0"></a-entity>
+  <a-entity draco-model="src:https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/Rook%20-%20Parliament.glb"  position=" -8 -1 -61" scale="16 16 16" rotation="0  10 0"></a-entity>
+  <a-entity draco-model="src:https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/Pawn%20-%20The%20People.glb"  position=" -8 -1 -64" scale="16 16 16" rotation="0 340 0"></a-entity>
+
+  <!-- ══ JETTY ══ -->
+  <a-entity draco-model="src:https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/wooden_jetty.glb" position="-10 -5 -46" scale="1 1 1" rotation="0 0 0"></a-entity>
+
+  <!-- ══ BOAT ══ -->
+  <a-entity draco-model="src:https://cdn.jsdelivr.net/gh/MarioBYND/Presentation-Day@main/Assets/raven_at_windermere_jetty_cumbria_uk.glb" position="25 0 -45" scale="1 1 1" rotation="0 20 0"></a-entity>
+
 
   <!-- ══ LIGHTING ══ -->
   <a-light type="ambient"     color="#FFF8F0" intensity=".72"></a-light>
@@ -275,33 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
     makeSky();
     makeSand();
 
-    const chess = document.getElementById('chess-piece-entity');
-    if (chess) {
-      chess.addEventListener('model-loaded', () => {
-        if (!window.THREE) return;
-        const modelObj = chess.object3D;
-        const parentObj = modelObj.parent;
-        if (!parentObj) return;
-
-        parentObj.updateMatrixWorld(true);
-        const box = new THREE.Box3().setFromObject(modelObj);
-        const centerWorld = new THREE.Vector3();
-        box.getCenter(centerWorld);
-        const centerLocal = centerWorld.clone();
-        parentObj.worldToLocal(centerLocal);
-        modelObj.position.x -= centerLocal.x;
-        modelObj.position.z -= centerLocal.z;
-
-        parentObj.updateMatrixWorld(true);
-        const box2 = new THREE.Box3().setFromObject(modelObj);
-        const minLocal = box2.min.clone();
-        parentObj.worldToLocal(minLocal);
-        modelObj.position.y -= minLocal.y;
-        modelObj.position.y += 0.02;
-      });
-      chess.addEventListener('model-error', (e) =>
-        console.warn('[A-Frame] chess piece failed to load', e));
-    }
   }
   if (scene.hasLoaded) init();
   else scene.addEventListener('loaded', init);
